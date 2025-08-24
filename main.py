@@ -28,34 +28,23 @@ def keep_alive():
 
 
 # ------------------- Config -------------------
-GUILD_ID = 1342974632524775526
+GUILD_ID = 1358184251216105683
 
 # Moderation roles allowed
 
 ALLOWED_ROLES = {
-    1402418357596061756,
-    1402418713612910663,
-    1403013958562218054,
-    1342974632524775528,
-    1405597740494356631,
-    1402419665808134395,
+    1358184251471822947,
 }
 
 UNBAN_ROLES = {
-    1402418357596061756,
-    1402418713612910663,
-    1403013958562218054,
-    1342974632524775527,
-    1342974632524775528,
-    1405597740494356631,
-    1402419665808134395,
+    1358184251471822947,
 }
 
 LOG_CHANNELS = {
-    "ban": 1405586824847556769,
-    "kick": 1405586854442569749,
-    "warn": 1406995238404231299,
-    "unban": 1405587917287587860,
+    "ban": 1409219483897299026,
+    "kick": 1409219531842519080,
+    "warn": 1409219557901729973,
+    "unban": 1409219582568169512,
 }
 
 # ------------------- Bot -------------------
@@ -122,11 +111,7 @@ class EmbedModal(Modal, title="Maak een Embed"):
 @bot.tree.command(name="embed", description="Maak een embed via formulier", guild=discord.Object(id=GUILD_ID))
 async def embed_cmd(interaction: discord.Interaction):
     allowed_roles = {
-        1402418713612910663,
-        1403013958562218054,
-        1342974632524775528,
-        1405597740494356631,
-        1402419665808134395
+        1358184251471822947,
     }
     if not any(r.id in allowed_roles for r in interaction.user.roles):
         await interaction.response.send_message("❌ Je hebt geen toegang tot dit commando.", ephemeral=True)
@@ -266,8 +251,7 @@ class RoleEmbedModal(Modal, title="Maak een Role Embed"):
     guild=discord.Object(id=GUILD_ID)
 )
 async def roleembed(interaction: discord.Interaction):
-    allowed_roles = {1402418713612910663, 1403013958562218054, 1342974632524775528,
-                     1405597740494356631, 1402419665808134395}
+    allowed_roles = {1358184251471822947}
     if not any(r.id in allowed_roles for r in interaction.user.roles):
         await interaction.response.send_message("❌ Je hebt geen toegang tot dit commando.", ephemeral=True)
         return
@@ -560,13 +544,7 @@ async def moderatie(interaction: discord.Interaction):
 
 # ✅ Rol-IDs die mogen
 ALLOWED_ROLES = {
-    1402418357596061756,
-    1402418713612910663,
-    1403013958562218054,
-    1342974632524775527,
-    1342974632524775528,
-    1405597740494356631,
-    1402419665808134395
+    1358184251471822947,
 }
 
 def has_allowed_role(interaction: discord.Interaction) -> bool:
@@ -642,13 +620,7 @@ async def listbans(interaction: discord.Interaction, limit: int = 10):
 @app_commands.describe(amount="Aantal berichten om te verwijderen (of 'all')")
 async def clear(interaction: discord.Interaction, amount: str):
     ALLOWED_ROLES = {
-        1402418357596061756, 
-        1402418713612910663, 
-        1403013958562218054, 
-        1342974632524775527, 
-        1342974632524775528, 
-        1405597740494356631, 
-        1402419665808134395
+        1358184251471822947, 
     }
 
     # Check of de gebruiker een van de rollen heeft

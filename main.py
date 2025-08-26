@@ -653,6 +653,17 @@ async def clear(interaction: discord.Interaction, amount: str):
         await interaction.followup.send("❌ Ongeldig aantal, gebruik een getal of 'all'.", ephemeral=True)
 
 @bot.event
+async def on_ready():
+    print(f"✅ Ingelogd als {bot.user} (ID: {bot.user.id})")
+    print("📡 Actieve event listeners:")
+
+    # Check of er meerdere handlers voor on_member_join zijn
+    if hasattr(bot, "extra_events") and "on_member_join" in bot.extra_events:
+        print(f"⚠️ Meerdere handlers gevonden voor on_member_join: {len(bot.extra_events['on_member_join'])}")
+    else:
+        print("✔️ Slechts 1 on_member_join handler actief")
+
+@bot.event
 async def on_member_join(member):
     channel = bot.get_channel(1358184251476152658)  # Specifiek kanaal
     if channel is None:

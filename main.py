@@ -47,6 +47,8 @@ LOG_CHANNELS = {
     "unban": 1409219582568169512,
 }
 
+WELCOME_CHANNEL_ID = 1358184251476152658
+
 # ------------------- Bot -------------------
 intents = discord.Intents.default()
 intents.message_content = True
@@ -652,20 +654,10 @@ async def clear(interaction: discord.Interaction, amount: str):
     except ValueError:
         await interaction.followup.send("❌ Ongeldig aantal, gebruik een getal of 'all'.", ephemeral=True)
 
-@bot.event
-async def on_ready():
-    print(f"✅ Ingelogd als {bot.user} (ID: {bot.user.id})")
-    print("📡 Actieve event listeners:")
-
-    # Check of er meerdere handlers voor on_member_join zijn
-    if hasattr(bot, "extra_events") and "on_member_join" in bot.extra_events:
-        print(f"⚠️ Meerdere handlers gevonden voor on_member_join: {len(bot.extra_events['on_member_join'])}")
-    else:
-        print("✔️ Slechts 1 on_member_join handler actief")
 
 @bot.event
 async def on_member_join(member):
-    channel = bot.get_channel(1358184251476152658)  # Specifiek kanaal
+    channel = bot.get_channel(WELCOME_CHANNEL_ID)
     if channel is None:
         return
 
@@ -673,13 +665,14 @@ async def on_member_join(member):
         title=f"🎉 Welkom bij Noorderveen Roleplay, {member.name}! 🎉",
         description=(
             "De leukste roleplay-server van Nederland! 🌟\n\n"
-            "📌 **Lees eerst de regels/APV door** zodat alles soepel verloopt.\n\n"
-            "💬 **We hopen dat je veel plezier hebt en nieuwe vrienden maakt!** ✨"
+            "📌 Lees eerst de regels /APV door zodat alles soepel verloopt.\n\n"
+            "💬 We hopen dat je veel plezier hebt en nieuwe vrienden maakt! ✨"
         ),
         color=0x00AE86
     )
     embed.set_thumbnail(url=member.display_avatar.url)
-    await channel.send(embed=embed)
+
+    await channel.send(content=f"Welkom {member.mention}! 🎊", embed=embed)
     
 # ------------------- Start Bot -------------------
 keep_alive()

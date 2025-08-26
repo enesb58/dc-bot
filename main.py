@@ -652,6 +652,24 @@ async def clear(interaction: discord.Interaction, amount: str):
     except ValueError:
         await interaction.followup.send("❌ Ongeldig aantal, gebruik een getal of 'all'.", ephemeral=True)
 
+@bot.event
+async def on_member_join(member):
+    channel = bot.get_channel(1358184251476152658)
+    if channel is None:
+        return
+
+    embed = discord.Embed(
+        title=f"🎉 Welkom bij Noorderveen Roleplay, {member.name}! 🎉",
+        description=(
+            "De leukste roleplay-server van Nederland! 🌟\n\n"
+            "📌 Lees eerst de regels/APV door zodat alles soepel verloopt.\n\n"
+            "💬 We hopen dat je veel plezier hebt en nieuwe vrienden maakt! ✨"
+        ),
+        color=0x00AE86
+    )
+    embed.set_thumbnail(url=member.display_avatar.url)
+    await channel.send(embed=embed)
+
 # ------------------- Start Bot -------------------
 keep_alive()
 TOKEN = os.getenv("DISCORD_TOKEN")

@@ -654,7 +654,7 @@ async def clear(interaction: discord.Interaction, amount: str):
 
 @bot.event
 async def on_member_join(member):
-    channel = bot.get_channel(1358184251476152658)
+    channel = bot.get_channel(1358184251476152658)  # Specifiek kanaal
     if channel is None:
         return
 
@@ -662,14 +662,14 @@ async def on_member_join(member):
         title=f"🎉 Welkom bij Noorderveen Roleplay, {member.name}! 🎉",
         description=(
             "De leukste roleplay-server van Nederland! 🌟\n\n"
-            "📌 Lees eerst de regels/APV door zodat alles soepel verloopt.\n\n"
-            "💬 We hopen dat je veel plezier hebt en nieuwe vrienden maakt! ✨"
+            "📌 **Lees eerst de regels/APV door** zodat alles soepel verloopt.\n\n"
+            "💬 **We hopen dat je veel plezier hebt en nieuwe vrienden maakt!** ✨"
         ),
         color=0x00AE86
     )
     embed.set_thumbnail(url=member.display_avatar.url)
     await channel.send(embed=embed)
-
+    
 # ------------------- Start Bot -------------------
 keep_alive()
 TOKEN = os.getenv("DISCORD_TOKEN")

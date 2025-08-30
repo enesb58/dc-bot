@@ -86,8 +86,8 @@ class ChangelogModal(Modal, title="Maak een Changelog"):
     async def on_submit(self, interaction: discord.Interaction):
         # Maak de embed aan met een blauwe kleur
         embed = discord.Embed(
-            title="Change-log",
-            description=f"Onderstaande aanpassingen zijn doorgevoerd:\n\n{self.aanpassingen.value}",
+            title="Changelog",
+            description=f"Onderstaande aanpassingen zijn doorgevoerd :\n\n{self.aanpassingen.value}",
             color=discord.Color.blue() # Blauwe kleur
         )
         

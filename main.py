@@ -95,7 +95,9 @@ class ChangelogModal(Modal, title="Maak een Changelog"):
         embed.set_footer(text=f"Noorderveen Roleplay - Update by:  {interaction.user.name}")
         
         # Voeg een timestamp toe (huidige tijd)
-        embed.timestamp = datetime.strptime(datum_str, "%d-%m-%Y %H:%M").replace(tzinfo=timezone.utc)
+        from datetime import datetime, timezone
+
+        embed.timestamp = datetime.now(timezone.utc)
 
         # Stuur de embed naar het kanaal waar het commando is gebruikt
         await interaction.channel.send(embed=embed)

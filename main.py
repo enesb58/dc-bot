@@ -30,8 +30,11 @@ def keep_alive():
 # ------------------- Config -------------------
 GUILD_ID = 1358184251216105683
 
-# Moderation roles allowed
+# <<< NIEUW >>>
+# Voeg hier de rol-ID toe die de /changelog en /embed commando's mag gebruiken.
+EMBED_ROLE_ID = 1411138999124234471 
 
+# Moderation roles allowed
 ALLOWED_ROLES = {
     1358184251471822947,
 }
@@ -68,6 +71,50 @@ async def on_ready():
         print(f"🌐 Slash commands gesynchroniseerd: {len(synced)}")
     except Exception as e:
         print(f"❌ Fout bij sync: {e}")
+
+# <<< NIEUW >>>
+# ------------------- Changelog Modal -------------------
+class ChangelogModal(Modal, title="Maak een Changelog"):
+    aanpassingen = TextInput(
+        label="Wat zijn de aanpassingen?",
+        style=discord.TextStyle.paragraph,
+        placeholder="- Server geüpdatet naar de laatste versie.\n- Nieuwe feature toegevoegd.",
+        required=True,
+        max_length=2000
+    )
+
+    async def on_submit(self, interaction: discord.Interaction):
+        # Maak de embed aan
+        embed = discord.Embed(
+            title="Change-log",
+            description=f"Onderstaande aanpassingen zijn doorgevoerd:\n\n{self.aanpassingen.value}",
+            color=discord.Color.from_rgb(54, 57, 63) # Donkergrijze kleur, vergelijkbaar met Discord
+        )
+        
+        # Voeg de footer toe met de username en de servernaam
+        embed.set_footer(text=f"Woensel Combat - Update by: [WSC] {interaction.user.name}")
+        
+        # Voeg een timestamp toe (huidige tijd)
+        embed.timestamp = datetime.now(timezone.utc)
+
+        # Stuur de embed naar het kanaal waar het commando is gebruikt
+        await interaction.channel.send(embed=embed)
+        
+        # Stuur een bevestiging naar de gebruiker
+        await interaction.response.send_message("✅ Changelog succesvol geplaatst!", ephemeral=True)
+
+# <<< NIEUW >>>
+# ------------------- Changelog Command -------------------
+@bot.tree.command(name="changelog", description="Maak een changelog embed", guild=discord.Object(id=GUILD_ID))
+async def changelog_cmd(interaction: discord.Interaction):
+    # Check of de gebruiker de vereiste rol heeft
+    user_roles = [r.id for r in interaction.user.roles]
+    if EMBED_ROLE_ID not in user_roles:
+        await interaction.response.send_message("❌ Je hebt geen toegang tot dit commando.", ephemeral=True)
+        return
+    
+    # Open de modal voor de gebruiker
+    await interaction.response.send_modal(ChangelogModal())
 
 
 # ------------------- Embed Modal -------------------
@@ -112,14 +159,12 @@ class EmbedModal(Modal, title="Maak een Embed"):
 
 @bot.tree.command(name="embed", description="Maak een embed via formulier", guild=discord.Object(id=GUILD_ID))
 async def embed_cmd(interaction: discord.Interaction):
-    allowed_roles = {
-        1358184251471822947,
-    }
-    if not any(r.id in allowed_roles for r in interaction.user.roles):
+    user_roles = [r.id for r in interaction.user.roles]
+    if EMBED_ROLE_ID not in user_roles:
         await interaction.response.send_message("❌ Je hebt geen toegang tot dit commando.", ephemeral=True)
         return
     await interaction.response.send_modal(EmbedModal())
-  
+    
 class RoleEmbedModal(Modal, title="Maak een Role Embed"):
     titel = TextInput(
         label="Titel", style=discord.TextStyle.short,
@@ -253,8 +298,8 @@ class RoleEmbedModal(Modal, title="Maak een Role Embed"):
     guild=discord.Object(id=GUILD_ID)
 )
 async def roleembed(interaction: discord.Interaction):
-    allowed_roles = {1358184251471822947}
-    if not any(r.id in allowed_roles for r in interaction.user.roles):
+    user_roles = [r.id for r in interaction.user.roles]
+    if EMBED_ROLE_ID not in user_roles:
         await interaction.response.send_message("❌ Je hebt geen toegang tot dit commando.", ephemeral=True)
         return
 
@@ -545,13 +590,14 @@ async def moderatie(interaction: discord.Interaction):
 
 
 # ✅ Rol-IDs die mogen
-ALLOWED_ROLES = {
+# Deze staat nu bovenaan als EMBED_ROLE_ID, maar we laten deze hier voor de andere commando's
+ALLOWED_ROLES_MOD = {
     1358184251471822947,
 }
 
 def has_allowed_role(interaction: discord.Interaction) -> bool:
     """Checkt of gebruiker minstens 1 van de toegestane rollen heeft."""
-    return any(r.id in ALLOWED_ROLES for r in interaction.user.roles)
+    return any(r.id in ALLOWED_ROLES_MOD for r in interaction.user.roles)
 
 # Debug commands: checkban + listbans
 @bot.tree.command(name="checkban", description="Check of een user ID geband is in deze server", guild=discord.Object(id=GUILD_ID))
@@ -621,12 +667,12 @@ async def listbans(interaction: discord.Interaction, limit: int = 10):
 @bot.tree.command(name="clear", description="Verwijder berichten uit een kanaal", guild=discord.Object(id=GUILD_ID))
 @app_commands.describe(amount="Aantal berichten om te verwijderen (of 'all')")
 async def clear(interaction: discord.Interaction, amount: str):
-    ALLOWED_ROLES = {
+    ALLOWED_ROLES_CLEAR = {
         1358184251471822947, 
     }
 
     # Check of de gebruiker een van de rollen heeft
-    if not any(r.id in ALLOWED_ROLES for r in interaction.user.roles):
+    if not any(r.id in ALLOWED_ROLES_CLEAR for r in interaction.user.roles):
         await interaction.response.send_message("❌ Je hebt geen toestemming om dit commando te gebruiken.", ephemeral=True)
         return
 

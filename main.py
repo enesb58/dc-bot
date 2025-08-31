@@ -732,11 +732,11 @@ WEBHOOKS = {
 
     "rol_gemaakt": "https://discord.com/api/webhooks/1411819933205266532/acL6EcN8pT7xXQ-JX9f7gUeFzK6K2kX4dktzer8hfsii6C1lzjkBj4X829JDijaUopVn",
 
-    "rol_verwijderd": "https://discord.com/api/webhooks/...",
+    "rol_verwijderd": "https://discord.com/api/webhooks/1411822367121870981/3nSJyTCCAFmNyyG4aoDH9VZCkQR-7ms7NmzABRTlncv0n2n3wC6-XGO6FRtxBBJfJS25",
 
-    "rol_veranderd": "https://discord.com/api/webhooks/...",
+    "rol_veranderd": "https://discord.com/api/webhooks/1411822367121870981/3nSJyTCCAFmNyyG4aoDH9VZCkQR-7ms7NmzABRTlncv0n2n3wC6-XGO6FRtxBBJfJS25",
 
-    "rol_permissies": "https://discord.com/api/webhooks/...",
+    "rol_permissies": "https://discord.com/api/webhooks/1411822367121870981/3nSJyTCCAFmNyyG4aoDH9VZCkQR-7ms7NmzABRTlncv0n2n3wC6-XGO6FRtxBBJfJS25",
 
     # Gebruikers
 
@@ -766,9 +766,9 @@ WEBHOOKS = {
 
     # Voice
 
-    "gesleept": "https://discord.com/api/webhooks/...",
+    "gesleept": "https://discord.com/api/webhooks/1411822367121870981/3nSJyTCCAFmNyyG4aoDH9VZCkQR-7ms7NmzABRTlncv0n2n3wC6-XGO6FRtxBBJfJS25",
 
-    "gedisconect": "https://discord.com/api/webhooks/...",
+    "gedisconect": "https://discord.com/api/webhooks/1411822367121870981/3nSJyTCCAFmNyyG4aoDH9VZCkQR-7ms7NmzABRTlncv0n2n3wC6-XGO6FRtxBBJfJS25",
 
     # Bots / Kanalen / Emoji
 

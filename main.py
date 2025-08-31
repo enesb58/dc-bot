@@ -11,6 +11,8 @@ from discord import SelectOption
 from flask import Flask
 from threading import Thread
 import re
+from discord.ext import commands
+import aiohttp
 
 # ------------------- Keep Alive Webserver -------------------
 app = Flask('')
@@ -721,6 +723,343 @@ async def on_member_join(member):
     embed.set_thumbnail(url=member.display_avatar.url)
 
     await channel.send(content=f"Welkom {member.mention}! 🎊", embed=embed)
+
+# === 1 webhook per event (plaats jouw URL’s hier) ===
+
+WEBHOOKS = {
+
+    # Rollen
+
+    "rol_gemaakt": "https://discord.com/channels/1410623409863393302/1410639549465628856",
+
+    "rol_verwijderd": "https://discord.com/api/webhooks/...",
+
+    "rol_veranderd": "https://discord.com/api/webhooks/...",
+
+    "rol_permissies": "https://discord.com/api/webhooks/...",
+
+    # Gebruikers
+
+    "persoon_gejoined": "https://discord.com/api/webhooks/...",
+
+    "persoon_geleaved": "https://discord.com/api/webhooks/...",
+
+    "gebruiker_naam_veranderd": "https://discord.com/api/webhooks/...",
+
+    "gebruiker_rollen_gevoegd": "https://discord.com/api/webhooks/...",
+
+    "gebruiker_rol_verwijderd": "https://discord.com/api/webhooks/...",
+
+    # Moderatie
+
+    "gekickt": "https://discord.com/api/webhooks/...",
+
+    "bans": "https://discord.com/api/webhooks/...",
+
+    "geunbannend": "https://discord.com/api/webhooks/...",
+
+    "lid_getimeoutd": "https://discord.com/api/webhooks/...",
+
+    "timeout_weggehaald": "https://discord.com/api/webhooks/...",
+
+    "warns": "https://discord.com/api/webhooks/...",
+
+    # Voice
+
+    "gesleept": "https://discord.com/api/webhooks/...",
+
+    "gedisconect": "https://discord.com/api/webhooks/...",
+
+    # Bots / Kanalen / Emoji
+
+    "bot_toegevoegd": "https://discord.com/api/webhooks/...",
+
+    "bot_verwijderd": "https://discord.com/api/webhooks/...",
+
+    "kanaal_gemaakt": "https://discord.com/api/webhooks/...",
+
+    "kanaal_verwijderd": "https://discord.com/api/webhooks/...",
+
+    "kanaal_permissies": "https://discord.com/api/webhooks/...",
+
+    "emoji_toegevoegd": "https://discord.com/api/webhooks/...",
+
+    "emoji_verwijderd": "https://discord.com/api/webhooks/..."
+
+}
+
+# === Helpers ===
+
+async def send_log(event: str, message: str):
+
+    url = WEBHOOKS.get(event)
+
+    if not url:
+
+        return
+
+    async with aiohttp.ClientSession() as session:
+
+        webhook = discord.Webhook.from_url(url, session=session)
+
+        await webhook.send(message, username="Logger")
+
+async def find_executor(guild, action, target):
+
+    """Zoek in audit logs wie een actie deed"""
+
+    async for entry in guild.audit_logs(limit=5, action=action):
+
+        if entry.target.id == target.id:
+
+            return entry.user
+
+    return None
+
+# === Members ===
+
+@bot.event
+
+async def on_member_join(member):
+
+    await send_log("persoon_gejoined", f"✅ {member} is gejoined.")
+
+@bot.event
+
+async def on_member_remove(member):
+
+    guild = member.guild
+
+    kicker = await find_executor(guild, discord.AuditLogAction.kick, member)
+
+    if kicker:
+
+        await send_log("gekickt", f"👢 {member} is gekickt door {kicker}")
+
+    else:
+
+        await send_log("persoon_geleaved", f"❌ {member} heeft de server verlaten.")
+
+@bot.event
+
+async def on_member_update(before, after):
+
+    if before.nick != after.nick:
+
+        await send_log("gebruiker_naam_veranderd",
+
+                       f"✏️ {before} veranderde naam: `{before.nick}` → `{after.nick}`")
+
+# Ban / Unban
+
+@bot.event
+
+async def on_member_ban(guild, user):
+
+    banner = await find_executor(guild, discord.AuditLogAction.ban, user)
+
+    await send_log("bans", f"🔨 {user} is geband door {banner}")
+
+@bot.event
+
+async def on_member_unban(guild, user):
+
+    unbanner = await find_executor(guild, discord.AuditLogAction.unban, user)
+
+    await send_log("geunbannend", f"♻️ {user} is geunbanned door {unbanner}")
+
+# Timeout
+
+@bot.event
+
+async def on_member_update(before, after):
+
+    if before.communication_disabled_until != after.communication_disabled_until:
+
+        if after.communication_disabled_until:  # timeout gezet
+
+            executor = await find_executor(before.guild, discord.AuditLogAction.member_update, before)
+
+            await send_log("lid_getimeoutd", f"⏳ {before} is in timeout gezet door {executor}")
+
+        else:  # timeout verwijderd
+
+            executor = await find_executor(before.guild, discord.AuditLogAction.member_update, before)
+
+            await send_log("timeout_weggehaald", f"✅ Timeout van {before} is verwijderd door {executor}")
+
+# Rollen bij gebruiker
+
+@bot.event
+
+async def on_member_update(before, after):
+
+    added_roles = [r for r in after.roles if r not in before.roles]
+
+    removed_roles = [r for r in before.roles if r not in after.roles]
+
+    if added_roles:
+
+        executor = await find_executor(before.guild, discord.AuditLogAction.member_role_update, before)
+
+        for role in added_roles:
+
+            await send_log("gebruiker_rollen_gevoegd",
+
+                           f"➕ {executor} gaf rol **{role.name}** aan {before}")
+
+    if removed_roles:
+
+        executor = await find_executor(before.guild, discord.AuditLogAction.member_role_update, before)
+
+        for role in removed_roles:
+
+            await send_log("gebruiker_rol_verwijderd",
+
+                           f"➖ {executor} verwijderde rol **{role.name}** van {before}")
+
+# === Rollen ===
+
+@bot.event
+
+async def on_guild_role_create(role):
+
+    creator = await find_executor(role.guild, discord.AuditLogAction.role_create, role)
+
+    await send_log("rol_gemaakt", f"➕ Rol **{role.name}** is gemaakt door {creator}")
+
+@bot.event
+
+async def on_guild_role_delete(role):
+
+    deleter = await find_executor(role.guild, discord.AuditLogAction.role_delete, role)
+
+    await send_log("rol_verwijderd", f"➖ Rol **{role.name}** is verwijderd door {deleter}")
+
+@bot.event
+
+async def on_guild_role_update(before, after):
+
+    updater = await find_executor(before.guild, discord.AuditLogAction.role_update, before)
+
+    await send_log("rol_veranderd", f"🔄 Rol **{before.name}** is aangepast door {updater}")
+
+# === Kanalen ===
+
+@bot.event
+
+async def on_guild_channel_create(channel):
+
+    creator = await find_executor(channel.guild, discord.AuditLogAction.channel_create, channel)
+
+    await send_log("kanaal_gemaakt", f"📢 Kanaal **{channel.name}** is gemaakt door {creator}")
+
+@bot.event
+
+async def on_guild_channel_delete(channel):
+
+    deleter = await find_executor(channel.guild, discord.AuditLogAction.channel_delete, channel)
+
+    await send_log("kanaal_verwijderd", f"📉 Kanaal **{channel.name}** is verwijderd door {deleter}")
+
+# === Emoji ===
+
+@bot.event
+
+async def on_guild_emojis_update(guild, before, after):
+
+    added = [e for e in after if e not in before]
+
+    removed = [e for e in before if e not in after]
+
+    for e in added:
+
+        creator = await find_executor(guild, discord.AuditLogAction.emoji_create, e)
+
+        await send_log("emoji_toegevoegd", f"😀 Emoji {e} toegevoegd door {creator}")
+
+    for e in removed:
+
+        deleter = await find_executor(guild, discord.AuditLogAction.emoji_delete, e)
+
+        await send_log("emoji_verwijderd", f"😢 Emoji {e} verwijderd door {deleter}")
+
+# === Berichten ===
+
+@bot.event
+
+async def on_message_delete(message):
+
+    if message.author.bot:
+
+        return
+
+    executor = await find_executor(message.guild, discord.AuditLogAction.message_delete, message)
+
+    await send_log("warns", f"🗑️ Bericht van {message.author} verwijderd door {executor} in {message.channel}\n"
+
+                            f"Inhoud: `{message.content}`")
+
+@bot.event
+
+async def on_message_edit(before, after):
+
+    if before.author.bot:
+
+        return
+
+    if before.content != after.content:
+
+        await send_log("warns", f"✏️ Bericht van {before.author} aangepast in {before.channel}\n"
+
+                                f"Van: `{before.content}`\nNaar: `{after.content}`")
+
+# === Voice ===
+
+@bot.event
+
+async def on_voice_state_update(member, before, after):
+
+    guild = member.guild
+
+    if before.channel and not after.channel:
+
+        executor = await find_executor(guild, discord.AuditLogAction.member_disconnect, member)
+
+        await send_log("gedisconect", f"🔌 {member} is gedisconnect door {executor}")
+
+    elif before.channel != after.channel and before.channel and after.channel:
+
+        executor = await find_executor(guild, discord.AuditLogAction.member_move, member)
+
+        await send_log("gesleept", f"🎧 {member} is gesleept van {before.channel} → {after.channel} door {executor}")
+
+# === Bots ===
+
+@bot.event
+
+async def on_member_join(member):
+
+    if member.bot:
+
+        adder = await find_executor(member.guild, discord.AuditLogAction.bot_add, member)
+
+        await send_log("bot_toegevoegd", f"🤖 Bot {member} toegevoegd door {adder}")
+
+    else:
+
+        await send_log("persoon_gejoined", f"✅ {member} is gejoined.")
+
+@bot.event
+
+async def on_member_remove(member):
+
+    if member.bot:
+
+        remover = await find_executor(member.guild, discord.AuditLogAction.kick, member)
+
+        await send_log("bot_verwijderd", f"🗑️ Bot {member} verwijderd door {remover}")
+
     
 # ------------------- Start Bot -------------------
 keep_alive()

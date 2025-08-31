@@ -730,7 +730,7 @@ WEBHOOKS = {
 
     # Rollen
 
-    "rol_gemaakt": "https://discord.com/channels/1410623409863393302/1410639549465628856",
+    "rol_gemaakt": "https://discord.com/api/webhooks/1411819933205266532/acL6EcN8pT7xXQ-JX9f7gUeFzK6K2kX4dktzer8hfsii6C1lzjkBj4X829JDijaUopVn",
 
     "rol_verwijderd": "https://discord.com/api/webhooks/...",
 
